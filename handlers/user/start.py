@@ -3,6 +3,7 @@ from aiogram import Router, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from datetime import datetime
+from aiogram.fsm.context import FSMContext
 
 from config.loader import dp
 from keyboards.user import main_keyboard
@@ -29,42 +30,47 @@ def define_numerator():
 
 
 router = Router()  # Вместо диспетчера
-command_messages = {}
 last_messages = {}
 
 
-async def handle_command(message: Message, text: str, type: str, parse_mode: str = None, reply_markup=None):
+async def handle_command(message: Message, text: str, type: str, parse_mode: str = None,
+                         reply_markup=None, state: FSMContext = None):
     await message.delete()
+    command_messages = {}
 
-    chat_id = message.chat.id
-    # Удаляем предыдущее сообщение бота этого типа, если есть
-    if chat_id in command_messages and type in command_messages[chat_id]:
-        try:
-            await message.bot.delete_message(chat_id, command_messages[chat_id][type])
-        except:
-            pass
+    if state:
+        # Получаем данные из состояния
+        data = await state.get_data()
+        command_messages = data.get('command_messages', {})
+
+        # Удаляем предыдущее сообщение
+        if type in command_messages:
+            try:
+                await message.bot.delete_message(message.chat.id, command_messages[type])
+            except:
+                pass
 
     new_message = await message.answer(text, parse_mode=parse_mode, reply_markup=reply_markup)
     # , show_alert=True
 
-    # Сохраняем ID нового сообщения
-    if chat_id not in command_messages:
-        command_messages[chat_id] = {}
-    command_messages[chat_id][type] = new_message.message_id
+    if state:
+        # Сохраняем в состоянии (обновляем словарь)
+        command_messages[type] = new_message.message_id
+        await state.update_data(command_messages=command_messages)
 
 
 @router.message(CommandStart())  # @dp.message(CommandStart())
-async def cmd_start(message: Message):
+async def cmd_start(message: Message, state: FSMContext):
     text = "Выбери ⤵️"
 
-    await handle_command(message, text, "start", reply_markup=main_keyboard.get_buttons())
+    await handle_command(message, text, "start", reply_markup=main_keyboard.get_buttons(), state=state)
 
 
 @router.message(Command('info'))  # Фильтр
-async def get_info(message: Message):
+async def cmd_info(message: Message, state: FSMContext):
     text = "<u><b>Обозначения пар</b></u>\n\n🔺 - Числитель\n🔹 - Знаменатель"
 
-    await handle_command(message, text, "info", parse_mode="HTML")
+    await handle_command(message, text, "info", parse_mode="HTML", state=state)
 
 '''
 @dp.message(F.photo)
