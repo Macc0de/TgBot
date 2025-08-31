@@ -1,11 +1,3 @@
-import os
+from dotenv import dotenv_values
 
-# Вместо dotenv_values берем из переменных окружения
-env_config = {
-    "TOKEN": os.getenv("BOT_TOKEN"),
-    # добавь другие переменные если нужны
-}
-
-# Проверка что токен есть
-if not env_config["TOKEN"]:
-    raise ValueError("BOT_TOKEN not found in environment variables")
+env_config = dotenv_values(".env")
