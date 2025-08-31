@@ -1,0 +1,362 @@
+# Обработка сообщений user'а
+from aiogram import Router, F
+from aiogram.filters import CommandStart, Command
+from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
+from datetime import datetime
+
+from config.loader import dp
+from keyboards.user import main_keyboard
+
+current_date = datetime.now()  # Дата
+day = current_date.day
+month = current_date.month
+
+
+def define_numerator():
+    if month == 9 and ((1 <= day <= 7) or (29 <= day <= 30)):
+        return "Числитель"
+    elif month == 10 and ((1 <= day <= 5) or (13 <= day <= 19) or (27 <= day <= 31)):
+        return "Числитель"
+    elif month == 11 and ((1 <= day <= 2) or (10 <= day <= 16) or (24 <= day <= 30)):
+        return "Числитель"
+    elif month == 12 and ((8 <= day <= 14) or (22 <= day <= 28)):
+        return "Числитель"
+
+    elif 9 <= month <= 12 or (month == 12 and day > 28):
+        return "Знаменатель"
+    else:  # Каникулы
+        return None
+
+
+router = Router()  # Вместо диспетчера
+command_messages = {}
+last_messages = {}
+
+
+async def handle_command(message: Message, text: str, type: str, parse_mode: str = None, reply_markup=None):
+    await message.delete()
+
+    chat_id = message.chat.id
+    # Удаляем предыдущее сообщение бота этого типа, если есть
+    if chat_id in command_messages and type in command_messages[chat_id]:
+        try:
+            await message.bot.delete_message(chat_id, command_messages[chat_id][type])
+        except:
+            pass
+
+    new_message = await message.answer(text, parse_mode=parse_mode, reply_markup=reply_markup)
+    # , show_alert=True
+
+    # Сохраняем ID нового сообщения
+    if chat_id not in command_messages:
+        command_messages[chat_id] = {}
+    command_messages[chat_id][type] = new_message.message_id
+
+
+@router.message(CommandStart())  # @dp.message(CommandStart())
+async def cmd_start(message: Message):
+    text = "Выбери ⤵️"
+
+    await handle_command(message, text, "start", reply_markup=main_keyboard.get_buttons())
+
+
+@router.message(Command('info'))  # Фильтр
+async def get_info(message: Message):
+    text = "<u><b>Обозначения пар</b></u>\n\n🔺 - Числитель\n🔹 - Знаменатель"
+
+    await handle_command(message, text, "info", parse_mode="HTML")
+
+'''
+@dp.message(F.photo)
+async def get_pic(message:Message):
+    await message.answer(f"ID: {message.photo[-1].file_id}")
+'''
+
+
+async def handle_message(callback: CallbackQuery, day_type: str, text: str, gif_url: str = None, alert: str = None):
+    chat_id = callback.message.chat.id
+
+    # Удаляем предыдущее сообщение для этого чата и типа дня
+    if chat_id in last_messages and day_type in last_messages[chat_id]:
+        try:
+            await callback.bot.delete_message(chat_id, last_messages[chat_id][day_type])
+        except:
+            pass
+
+    # Отправляем новое сообщение
+    if gif_url is not None:
+        new_message = await callback.message.answer_animation(gif_url, caption=text)
+    else:
+        new_message = await callback.message.answer(text, parse_mode='HTML')
+
+    # Сохраняем ID нового сообщения
+    if chat_id not in last_messages:
+        last_messages[chat_id] = {}
+    last_messages[chat_id][day_type] = new_message.message_id
+
+    if alert:
+        await callback.answer(alert, show_alert=False)
+    else:
+        await callback.answer()  # По умолчанию
+
+
+@router.callback_query(F.data == 'auto')
+async def auto(callback: CallbackQuery):
+    weekdays = {
+        0: 'Понедельник',
+        1: 'Вторник',
+        2: 'Среда',
+        3: 'Четверг',
+        4: 'Пятница',
+        5: 'Суббота',
+        6: 'Воскресенье'
+    }
+    weekday = current_date.weekday()
+    today_weekday = weekdays[weekday]
+
+    date_text = f"{day:02d}.{month:02d} - {today_weekday}"
+    await handle_message(callback, 'auto_date', date_text, alert="План на сегодня")
+
+    if define_numerator() is None:
+        url = ("https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGJxbmNweXhndXlrZHVhZ3Q1bnJqMTE3em5mbW5penlrbXNpb2"
+               "1jeiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/cmruux5yjyy2VNdyt3/giphy.gif")
+        caption = "Каникулы... 🎉 🌅"
+        await handle_message(callback, 'holidays', caption, url)
+    elif weekday in [0, 6]:
+        url = "https://cs4.pikabu.ru/post_img/2014/02/28/9/1393598295_1283013917.gif"
+        caption = "Сегодня отдыхаем 😎"
+        await handle_message(callback, 'weekdays', caption, url)
+    elif today_weekday == "Вторник":
+        text = ("1. (Пр)Методы оптимизации: Легков 301\n"
+                "2. (Л)Методы оптимизации: Легков 301")
+        await handle_message(callback, 'auto_tue', text)
+    elif today_weekday == "Среда":
+        if define_numerator() == "Числитель":
+            text = ("1.\n"
+                    "2. (Л)Теория автоматов: Кузьмин 220\n"
+                    "3. (Л)Рекурсивно-логическое пр-е: Башкин 224\n")
+            await handle_message(callback, 'auto_num_wed', text)
+        elif define_numerator() == "Знаменатель":
+            text = ("1.\n"
+                    "2. (Л)Теория автоматов: Кузьмин 220\n"
+                    "3. (Л)Рекурсивно-логическое пр-е: Башкин 224\n"
+                    "4. (Л)Рекурсивно-логическое пр-е: Башкин 224")
+            await handle_message(callback, 'auto_denum_wed', text)
+    elif today_weekday == "Четверг":
+        if define_numerator() == "Числитель":
+            text = ("1.\n"
+                    "2. (Пр)Huawei: Корсаков 201\n"
+                    "3.\n"
+                    "4. (Л)Нейронки: Сажин 204")
+            await handle_message(callback, 'auto_num_thu', text)
+        elif define_numerator() == "Знаменатель":
+            text = ("1. (Л)БЖД: Зеркалина 410-411\n"
+                    "2. (Пр)БЖД: Зеркалина 410-411\n"
+                    "3.\n"
+                    "4. (Л)Нейронки: Сажин 204")
+            await handle_message(callback, 'auto_denum_thu', text)
+    elif today_weekday == "Пятница":
+        if define_numerator() == "Числитель":
+            text = ("1. (Пр)Теория автоматов: Гладков 304\n"
+                    "2. (Л)Веб-приложения: Васильев 221\n"
+                    "3. (Пр)Веб-приложения: Васильев 221\n"
+                    "4. Физра")
+            await handle_message(callback, 'auto_num_fri', text)
+        elif define_numerator() == "Знаменатель":
+            text = ("1. (Пр)Теория автоматов: Гладков 304\n"
+                    "2. (Л)Huawei: Корсаков 201(312)\n"
+                    "3. (Пр)Веб-приложения: Васильев 221\n"
+                    "4. Физра")
+            await handle_message(callback, 'auto_denum_fri', text)
+    elif today_weekday == "Суббота":
+        text = ("1. (Л)БД: Горбунов 216\n"
+                "2. (Л)БД: Горбунов 216")
+        await handle_message(callback, 'auto_sat', text)
+
+
+@router.callback_query(F.data == 'tue')
+async def tuesday(callback: CallbackQuery):
+    # await callback.message.edit_text('Привет', reply_markup=await main_keyboard.inline_tue()) - ВАЖНО
+
+    text = "<u><b>Вторник</b></u>\n1. (Пр)Методы оптимизации: Легков 301\n2. (Л)Методы оптимизации: Легков 301"
+    await handle_message(callback, 'tuesday', text)
+
+
+@router.callback_query(F.data == 'wed')
+async def wednesay(callback: CallbackQuery):
+    text = ("<u><b>Среда</b></u>\n1.\n2. (Л)Теория автоматов: Кузьмин 220\n"
+            "3. (Л)Рекурсивно-логическое пр-е: Башкин 224\n4. 🔺\n    🔹(Л)Рекурсивно-логическое пр-е: Башкин 224")
+    await handle_message(callback, 'wednesday', text)
+
+
+@router.callback_query(F.data == 'thu')
+async def thursday(callback: CallbackQuery):
+    text = ("<u><b>Четверг</b></u>\n"
+            "1. 🔺\n"
+            "    🔹(Л)БЖД: Зеркалина 410-411\n"
+            "2. 🔺(Пр)Huawei: Корсаков 201\n"
+            "    🔹(Пр)БЖД: Зеркалина 410-411\n"
+            "3.\n"
+            "4. (Л)Нейронки: Сажин 204")
+    await handle_message(callback, 'thursday', text)
+
+
+@router.callback_query(F.data == 'fri')
+async def friday(callback: CallbackQuery):
+    text = ("<u><b>Пятница</b></u>\n"
+            "1. (Пр)Теория автоматов: Гладков 304\n"
+            "2. 🔺(Л)Веб-приложения: Васильев 221\n"
+            "    🔹(Л)Huawei: Корсаков 201(312)\n"
+            "3. (Пр)Веб-приложения: Васильев 221\n"
+            "4. Физра")
+    await handle_message(callback, 'friday', text)
+
+
+@router.callback_query(F.data == 'sat')
+async def saturday(callback: CallbackQuery):
+    text = ("<u><b>Суббота</b></u>\n"
+            "1. (Л)БД: Горбунов 216\n"
+            "2. (Л)БД: Горбунов 216")
+    await handle_message(callback, 'saturday', text)
+
+
+@router.callback_query(F.data == 'time')
+async def time(callback: CallbackQuery):
+    text = ("1️⃣  9:00 - 10:35\n"
+            "2️⃣ 10:45 - 12:20\n"
+            "3️⃣  13:20 - 14:55\n"
+            "4️⃣  15:05 - 16:40\n"
+            "5️⃣  16:50 - 18:25")
+    await handle_message(callback, 'time', text)
+
+
+# @dp.message_handler(commands="start")
+# async def handler(message: Message):
+#     msg = await message.answer("👋👋", reply_markup=main_keyboard.get_buttons(), parse_mode="Markdown")
+#     await storage.set_state(user=message.from_user.id, state="Control")
+
+
+# Обработчик Control
+# @dp.callback_query_handler(state="Control")
+# async def control(callback: CallbackQuery, state: FSMContext):
+#     # await state.set_state("Control") - Разные декораторы
+#
+#     weekdays = {
+#         0: 'Понедельник',
+#         1: 'Вторник',
+#         2: 'Среда',
+#         3: 'Четверг',
+#         4: 'Пятница',
+#         5: 'Суббота',
+#         6: 'Воскресенье'
+#     }
+#     weekday = current_date.weekday()
+#     today_weekday = weekdays[weekday]
+
+#     if callback.data == "auto":
+#         try:
+#             await bot.delete_message(chat_id, user_last_messages[user_id])
+#         except:
+#             pass
+#
+#         await callback.message.answer(f"{day:02d}.{month:02d} - {today_weekday}")
+#
+#         if define_numerator() is None:
+#             await callback.message.answer_animation("https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGJxbmNweXhndXlrZHVhZ3Q"
+#                                            "1bnJqMTE3em5mbW5penlrbXNpb21jeiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/"
+#                                            "cmruux5yjyy2VNdyt3/giphy.gif", caption="Каникулы... 🎉 🌅")
+#         elif weekday in [0, 6]:
+#             await callback.message.answer_animation("https://cs4.pikabu.ru/post_img/2014/02/28/"
+#                                            "9/1393598295_1283013917.gif", caption="Сегодня отдыхаем 😎")
+#
+#     await callback.answer()
+
+
+
+#         elif today_weekday == "Вторник":
+#             await message.answer("1. (Пр)Методы оптимизации: Легков 301\n"
+#                                  "2. (Л)Методы оптимизации: Легков 301")
+#         elif today_weekday == "Среда":
+#             if define_numerator() == "Числитель":
+#                 await message.answer("1.\n"
+#                                      "2. (Л)Теория автоматов: Кузьмин 220\n"
+#                                      "3. (Л)Рекурсивно-логическое пр-е: Башкин 224\n")
+#             elif define_numerator() == "Знаменатель":
+#                 await message.answer("1.\n"
+#                                      "2. (Л)Теория автоматов: Кузьмин 220\n"
+#                                      "3. (Л)Рекурсивно-логическое пр-е: Башкин 224\n"
+#                                      "4. (Л)Рекурсивно-логическое пр-е: Башкин 224")
+#         elif today_weekday == "Четверг":
+#             if define_numerator() == "Числитель":
+#                 await message.answer("1.\n"
+#                                      "2. (Пр)Huawei: Корсаков 201\n"
+#                                      "3.\n"
+#                                      "4. (Л)Нейронки: Сажин 204")
+#             elif define_numerator() == "Знаменатель":
+#                 await message.answer("1. (Л)БЖД: Зеркалина 410-411\n"
+#                                      "2. (Пр)БЖД: Зеркалина 410-411\n"
+#                                      "3.\n"
+#                                      "4. (Л)Нейронки: Сажин 204")
+#         elif today_weekday == "Пятница":
+#             if define_numerator() == "Числитель":
+#                 await message.answer("1. (Пр)Теория автоматов: Гладков 304\n"
+#                                      "2. (Л)Веб-приложения: Васильев 221\n"
+#                                      "3. (Пр)Веб-приложения: Васильев 221\n"
+#                                      "4. Физра")
+#             elif define_numerator() == "Знаменатель":
+#                 await message.answer("1. (Пр)Теория автоматов: Гладков 304\n"
+#                                      "2. (Л)Huawei: Корсаков 201(312)\n"
+#                                      "3. (Пр)Веб-приложения: Васильев 221\n"
+#                                      "4. Физра")
+#         elif today_weekday == "Суббота":
+#             await message.answer("1. (Л)БД: Горбунов 216\n"
+#                                  "2. (Л)БД: Горбунов 216")
+
+#     elif message.text == "Вторник":  # Выбор юзера
+#         await message.answer("1. (Пр)Методы оптимизации: Легков 301\n"
+#                              "2. (Л)Методы оптимизации: Легков 301")
+#     elif message.text == "Среда":
+#         await message.answer("1.\n"
+#                              "2. (Л)Теория автоматов: Кузьмин 220\n"
+#                              "3. (Л)Рекурсивно-логическое пр-е: Башкин 224\n"
+#                              "4. 🔺\n"
+#                              "    🔹(Л)Рекурсивно-логическое пр-е: Башкин 224", parse_mode="HTML")
+#     elif message.text == "Четверг":
+#         await message.answer("1. 🔺\n"
+#                              "    🔹(Л)БЖД: Зеркалина 410-411\n"
+#                              "2. 🔺(Пр)Huawei: Корсаков 201\n"
+#                              "    🔹(Пр)БЖД: Зеркалина 410-411\n"
+#                              "3.\n"
+#                              "4. (Л)Нейронки: Сажин 204", parse_mode="HTML")
+#     elif message.text == "Пятница":
+#         await message.answer("1. (Пр)Теория автоматов: Гладков 304\n"
+#                              "2. 🔺(Л)Веб-приложения: Васильев 221\n"
+#                              "    🔹(Л)Huawei: Корсаков 201(312)\n"
+#                              "3. (Пр)Веб-приложения: Васильев 221\n"
+#                              "4. Физра", parse_mode="HTML")
+#     elif message.text == "Суббота":
+#         await message.answer("1. (Л)БД: Горбунов 216\n"
+#                              "2. (Л)БД: Горбунов 216")
+#
+#     elif message.text == "Время пар 🕗":
+#         await message.answer("1️⃣  9:00 - 10:35\n"
+#                              "2️⃣  10:45 - 12:20\n"
+#                              "3️⃣  13:20 - 14:55\n"
+#                              "4️⃣  15:05 - 16:40\n"
+#                              "5️⃣  16:50 - 18:25")
+
+
+
+# Сразу сработает
+# (lambda message: message.text.lower() == "собачка", state="Control")
+# Декоратор для dog
+'''@dp.message_handler(state="dog")
+async def dogger(message: Message, state: FSMContext):  # Для возврата к Control
+    if message.text.lower() == "собачка":
+        await message.answer_photo(photo="https://terra.vet/wp-content/uploads/30-1.jpg")
+        await state.set_state("Control")
+@dp.message_handler(state="cat")
+async def catter(message: Message, state: FSMContext):
+    if message.text.lower() == "кошечка":
+        await message.answer_photo(photo="https://icdn.lenta.ru/images/2022/02/22/12/20220222122412571/wide_4_3_f7a1fd0b424854c0415f2faa1efa1b93.jpeg")
+        await state.set_state("Control")'''
