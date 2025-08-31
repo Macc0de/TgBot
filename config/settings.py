@@ -1,3 +1,7 @@
-from dotenv import dotenv_values
+import os
 
-env_config = dotenv_values(".env")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+if not BOT_TOKEN:
+    raise ValueError("BOT_TOKEN environment variable is required")
+
