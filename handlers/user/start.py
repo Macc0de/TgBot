@@ -67,7 +67,7 @@ async def cmd_start(message: Message, state: FSMContext):
 
 
 @router.message(Command('info'))  # Фильтр
-async def get_info(message: Message, state: FSMContext):
+async def cmd_info(message: Message, state: FSMContext):
     text = "<u><b>Обозначения пар</b></u>\n\n🔺 - Числитель\n🔹 - Знаменатель\n(Л) - Лекция\n(Пр) - Практика"
 
     await handle_command(message, text, "info", parse_mode="HTML", state=state)
