@@ -254,17 +254,18 @@ async def time(callback: CallbackQuery):
     await handle_message(callback, 'time', text)
 
 
-def progress_bar(percentage, length=15):
+def progress_bar(percentage, length=10):
     filled = int(percentage / 100 * length)
     empty = length - filled
-    return "[" + "▰" * filled + "▱" * empty + "]"
+    colors = ["🟥", "🟧", "🟨", "🟩", "🟦", "🟪"]
+    color = colors[min(5, int(percentage / 20))]
+    return color * filled + "⬜" * empty
 
 
 @router.callback_query(F.data == 'left_time')
 async def left_time(callback: CallbackQuery):
     total_days = 118
 
-    passed_days = 0
     start = 2  # 02.09
     if month == 9:
         passed_days = day - start
