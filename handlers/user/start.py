@@ -122,7 +122,7 @@ async def auto(callback: CallbackQuery):
     weekday = current_date.weekday()
     today_weekday = weekdays[weekday]
 
-    date_text = f"{day:02d}.{month:02d} - {today_weekday}"
+    date_text = f"{day:02d}.{month:02d} - {today_weekday} 🌄"
     await handle_message(callback, 'auto_date', date_text, alert="План на сегодня")
 
     if define_numerator() is None:
