@@ -26,7 +26,8 @@ def get_buttons():
         [InlineKeyboardButton(text="Вторник  ", callback_data="tue"), InlineKeyboardButton(text="Среда", callback_data="wed"),
          InlineKeyboardButton(text="Четверг", callback_data="thu")],
         [InlineKeyboardButton(text="Пятница", callback_data="fri"), InlineKeyboardButton(text="Суббота", callback_data="sat")],
-        [InlineKeyboardButton(text="Время пар 🕗", callback_data="time")]
+        [InlineKeyboardButton(text="Время пар 🕗", callback_data="time")],
+        [InlineKeyboardButton(text="Сколько ещё учиться? 🤔", callback_data="left_time")]
     ])
 
     return kb
