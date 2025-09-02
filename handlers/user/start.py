@@ -254,6 +254,42 @@ async def time(callback: CallbackQuery):
     await handle_message(callback, 'time', text)
 
 
+def progress_bar(percentage, length=15):
+    filled = int(percentage / 100 * length)
+    empty = length - filled
+    return "[" + "▰" * filled + "▱" * empty + "]"
+
+
+@router.callback_query(F.data == 'left_time')
+async def left_time(callback: CallbackQuery):
+    total_days = 118
+
+    passed_days = 0
+    start = 2  # 02.09
+    if month == 9:
+        passed_days = day - start
+    elif month == 10:
+        passed_days = day + 29
+    elif month == 11:
+        passed_days = day + 60
+    elif month == 12:
+        if day <= 27:
+            passed_days = day + 90
+        else:
+            passed_days = total_days
+    else:
+        passed_days = total_days
+
+    passed_days = 10
+    x = (passed_days * 100) / total_days
+    percent = round(x, 1)
+    text = (f"Осталось: {total_days - passed_days} дней ⏳\n"
+            f"Пройдено: <b>{percent}%</b> ☑️\n"
+            f"{progress_bar(x)}")
+
+    await handle_message(callback, 'left_time', text)
+
+
 # @dp.message_handler(commands="start")
 # async def handler(message: Message):
 #     msg = await message.answer("👋👋", reply_markup=main_keyboard.get_buttons(), parse_mode="Markdown")
