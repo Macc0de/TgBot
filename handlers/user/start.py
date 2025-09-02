@@ -193,7 +193,7 @@ async def tuesday(callback: CallbackQuery):
 
 
 def format_header(text):
-    separator = "─" * 10
+    separator = "─" * 9
     return f"{separator}[{text}]{separator}"
 
 
@@ -204,7 +204,7 @@ async def wednesay(callback: CallbackQuery):
             "2. (Л) Теория автоматов: Кузьмин 220\n"
             "3. (Л) Рекурсивно-логическое пр-е: Башкин 224\n"
             + format_header("к/в 1") +
-            "\n    (Л) Пром. разработка: Полетаев 210\n"
+            "\n    (Пр) Пром. разработка: Полетаев 210\n"
             "4. 🔺\n"
             "    🔹(Л) Рекурсивно-логическое пр-е: Башкин 224")
     await handle_message(callback, 'wednesday', text)
