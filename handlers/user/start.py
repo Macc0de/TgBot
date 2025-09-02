@@ -2,13 +2,15 @@
 from aiogram import Router, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
-from datetime import datetime
 from aiogram.fsm.context import FSMContext
+from datetime import datetime
+import pytz
 
 from config.loader import dp
 from keyboards.user import main_keyboard
 
-current_date = datetime.now()  # Дата
+tz = pytz.timezone('Europe/Moscow')
+current_date = datetime.now(tz)  # Дата
 day = current_date.day
 month = current_date.month
 
