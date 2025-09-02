@@ -280,7 +280,6 @@ async def left_time(callback: CallbackQuery):
     else:
         passed_days = total_days
 
-    passed_days = 10
     x = (passed_days * 100) / total_days
     percent = round(x, 1)
     text = (f"Осталось: {total_days - passed_days} дней ⏳\n"
