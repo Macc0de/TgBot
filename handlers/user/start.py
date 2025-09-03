@@ -14,6 +14,15 @@ current_date = datetime.now(tz)  # Дата
 day = current_date.day
 month = current_date.month
 
+print("=== ДИАГНОСТИКА ===")
+print(f"Текущее время сервера (UTC): {datetime.utcnow()}")
+print(f"Текущее время Москва: {current_date}")
+print(f"Дата: {current_date.day}.{current_date.month}")
+print(f"День недели: {current_date.strftime('%A')}")
+print(f"Часовой пояс: {tz}")
+print(f"Смещение: {current_date.utcoffset()}")
+print(f"Версия pytz: {pytz.__version__}")
+
 
 def define_numerator():
     if month == 9 and ((1 <= day <= 7) or (29 <= day <= 30)):
