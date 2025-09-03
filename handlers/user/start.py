@@ -4,24 +4,15 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from datetime import datetime
-import pytz
+from zoneinfo import ZoneInfo
 
 from config.loader import dp
 from keyboards.user import main_keyboard
 
-tz = pytz.timezone('Europe/Moscow')
+tz = ZoneInfo('Europe/Moscow')
 current_date = datetime.now(tz)  # Дата
 day = current_date.day
 month = current_date.month
-
-print("=== ДИАГНОСТИКА ===")
-print(f"Текущее время сервера (UTC): {datetime.utcnow()}")
-print(f"Текущее время Москва: {current_date}")
-print(f"Дата: {current_date.day}.{current_date.month}")
-print(f"День недели: {current_date.strftime('%A')}")
-print(f"Часовой пояс: {tz}")
-print(f"Смещение: {current_date.utcoffset()}")
-print(f"Версия pytz: {pytz.__version__}")
 
 
 def define_numerator():
