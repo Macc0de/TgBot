@@ -4,18 +4,13 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from datetime import datetime
-from zoneinfo import ZoneInfo
+import pytz
 
 from config.loader import dp
 from keyboards.user import main_keyboard
 
-tz = ZoneInfo('Europe/Moscow')
-current_date = datetime.now(tz)  # Дата
-day = current_date.day
-month = current_date.month
 
-
-def define_numerator():
+def define_numerator(day, month):
     if month == 9 and ((1 <= day <= 7) or (29 <= day <= 30)):
         return "Числитель"
     elif month == 10 and ((1 <= day <= 5) or (13 <= day <= 19) or (27 <= day <= 31)):
@@ -107,9 +102,15 @@ async def handle_message(callback: CallbackQuery, day_type: str, text: str, gif_
     else:
         await callback.answer()  # По умолчанию
 
+tz = pytz.timezone('Europe/Moscow')
+
 
 @router.callback_query(F.data == 'auto')
 async def auto(callback: CallbackQuery):
+    current_date = datetime.now(tz)  # Дата
+    day = current_date.day
+    month = current_date.month
+
     weekdays = {
         0: 'Понедельник',
         1: 'Вторник',
@@ -125,7 +126,7 @@ async def auto(callback: CallbackQuery):
     date_text = f"{day:02d}.{month:02d} - {today_weekday} 🌄"
     await handle_message(callback, 'auto_date', date_text, alert="План на сегодня")
 
-    if define_numerator() is None:
+    if define_numerator(day, month) is None:
         url = ("https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGJxbmNweXhndXlrZHVhZ3Q1bnJqMTE3em5mbW5penlrbXNpb2"
                "1jeiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/cmruux5yjyy2VNdyt3/giphy.gif")
         caption = "Каникулы... 🎉 🌅"
@@ -139,38 +140,38 @@ async def auto(callback: CallbackQuery):
                 "2. (Л) Методы оптимизации: Легков 301")
         await handle_message(callback, 'auto_tue', text)
     elif today_weekday == "Среда":
-        if define_numerator() == "Числитель":
+        if define_numerator(day, month) == "Числитель":
             text = ("1.\n"
                     "2. (Л) Теория автоматов: Кузьмин 220\n"
                     "3. (Л) Рекурсивно-логическое пр-е: Башкин 224\n")
             await handle_message(callback, 'auto_num_wed', text)
-        elif define_numerator() == "Знаменатель":
+        elif define_numerator(day, month) == "Знаменатель":
             text = ("1.\n"
                     "2. (Л) Теория автоматов: Кузьмин 220\n"
                     "3. (Л) Рекурсивно-логическое пр-е: Башкин 224\n"
                     "4. (Л) Рекурсивно-логическое пр-е: Башкин 224")
             await handle_message(callback, 'auto_denum_wed', text)
     elif today_weekday == "Четверг":
-        if define_numerator() == "Числитель":
+        if define_numerator(day, month) == "Числитель":
             text = ("1.\n"
                     "2. (Пр) Huawei: Корсаков 201\n"
                     "3.\n"
                     "4. (Л) Нейронки: Сажин 204")
             await handle_message(callback, 'auto_num_thu', text)
-        elif define_numerator() == "Знаменатель":
+        elif define_numerator(day, month) == "Знаменатель":
             text = ("1. (Л) БЖД: Зеркалина 410-411\n"
                     "2. (Пр) БЖД: Зеркалина 410-411\n"
                     "3.\n"
                     "4. (Л) Нейронки: Сажин 204")
             await handle_message(callback, 'auto_denum_thu', text)
     elif today_weekday == "Пятница":
-        if define_numerator() == "Числитель":
+        if define_numerator(day, month) == "Числитель":
             text = ("1. (Пр) Теория автоматов: Гладков 304\n"
                     "2. <s>(Л) Веб-приложения: Васильев 221</s>\n"
                     "3. <s>(Пр) Веб-приложения: Васильев 221</s>\n"
                     "4. Физра")
             await handle_message(callback, 'auto_num_fri', text)
-        elif define_numerator() == "Знаменатель":
+        elif define_numerator(day, month) == "Знаменатель":
             text = ("1. (Пр) Теория автоматов: Гладков 304\n"
                     "2. (Л) Huawei: Корсаков 201(312)\n"
                     "3. <s>(Пр) Веб-приложения: Васильев 221</s>\n"
@@ -264,6 +265,9 @@ def progress_bar(percentage, length=10):
 
 @router.callback_query(F.data == 'left_time')
 async def left_time(callback: CallbackQuery):
+    current_date = datetime.now(tz)  # Дата
+    day = current_date.day
+    month = current_date.month
     total_days = 118
 
     start = 2  # 02.09
