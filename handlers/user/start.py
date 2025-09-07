@@ -102,6 +102,7 @@ async def handle_message(callback: CallbackQuery, day_type: str, text: str, gif_
     else:
         await callback.answer()  # По умолчанию
 
+
 tz = pytz.timezone('Europe/Moscow')
 
 
@@ -292,6 +293,7 @@ async def left_time(callback: CallbackQuery):
             f"{progress_bar(x)}")
 
     await handle_message(callback, 'left_time', text)
+
 
 
 # @dp.message_handler(commands="start")
