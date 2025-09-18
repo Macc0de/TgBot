@@ -156,13 +156,13 @@ async def auto(callback: CallbackQuery):
         if define_numerator(day, month) == "Числитель":
             text = ("1.\n"
                     "2. (Пр) Huawei: Корсаков 201\n"
-                    "3. ||Физра||\n"
+                    "3. <tg-spoiler>Физра</tg-spoiler>\n"
                     "4. (Л) Нейронки: Сажин 224")
             await handle_message(callback, 'auto_num_thu', text)
         elif define_numerator(day, month) == "Знаменатель":
             text = ("1. (Л) БЖД: Зеркалина 410-411\n"
                     "2. (Пр) БЖД: Зеркалина 410-411\n"
-                    "3. ||Физра||\n"
+                    "3. <tg-spoiler>Физра</tg-spoiler>\n"
                     "4. (Л) Нейронки: Сажин 224")
             await handle_message(callback, 'auto_denum_thu', text)
     elif today_weekday == "Пятница":
