@@ -156,14 +156,14 @@ async def auto(callback: CallbackQuery):
         if define_numerator(day, month) == "Числитель":
             text = ("1.\n"
                     "2. (Пр) Huawei: Корсаков 201\n"
-                    "3. <spoiler>Физра</spoiler>\n"
+                    "3. ||Физра||\n"
                     "4. (Л) Нейронки: Сажин 224")
             await handle_message(callback, 'auto_num_thu', text)
         elif define_numerator(day, month) == "Знаменатель":
             text = ("1. (Л) БЖД: Зеркалина 410-411\n"
                     "2. (Пр) БЖД: Зеркалина 410-411\n"
-                    "3. <spoiler>Физра</spoiler>\n"
-                    "4. (Л) Нейронки: Сажин 204")
+                    "3. ||Физра||\n"
+                    "4. (Л) Нейронки: Сажин 224")
             await handle_message(callback, 'auto_denum_thu', text)
     elif today_weekday == "Пятница":
         if define_numerator(day, month) == "Числитель":
@@ -223,7 +223,7 @@ async def thursday(callback: CallbackQuery):
             + format_header("к/в 1") +
             "\n4. (Л) ASP\u200B.NET: Васильчиков 210\n"
             + format_header("к/в 2") +
-            "\n    (Л) Нейронки: Сажин 204")
+            "\n    (Л) Нейронки: Сажин 224")
     await handle_message(callback, 'thursday', text)
 
 
