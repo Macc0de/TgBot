@@ -17,11 +17,13 @@ def define_numerator(day, month):
         return "Числитель"
     elif month == 11 and ((1 <= day <= 2) or (10 <= day <= 16) or (24 <= day <= 30)):
         return "Числитель"
-    elif month == 12 and ((8 <= day <= 14) or (22 <= day <= 28)):
+    elif month == 12 and ((8 <= day <= 14) or (22 <= day <= 27)):
         return "Числитель"
 
-    elif 9 <= month <= 12 or (month == 12 and day > 28):
-        return "Знаменатель"
+    elif month == 12 and (day > 27):  # 28.12
+        return "НГ"
+    elif month == 1 and (1 <= day <= 24):
+        return "Сессия"
     else:  # Каникулы
         return None
 
@@ -132,6 +134,16 @@ async def auto(callback: CallbackQuery):
                "1jeiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/cmruux5yjyy2VNdyt3/giphy.gif")
         caption = "Каникулы... 🎉 🌅"
         await handle_message(callback, 'holidays', caption, url)
+
+    elif define_numerator(day, month) == "НГ":
+        url = ("https://s7.ezgif.com/tmp/ezgif-7d5285712ef75cae.gif")
+        caption = "НГ!!! 🎄 ❄"
+        await handle_message(callback, 'new_year', caption, url)
+    elif define_numerator(day, month) == "Сессия":
+        url = ("https://s7.ezgif.com/tmp/ezgif-7097d064d7d7107c.gif")
+        caption = "Удачи нам... 💀 🌑"
+        await handle_message(callback, 'session', caption, url)
+
     elif weekday in [0, 6]:
         url = "https://cs4.pikabu.ru/post_img/2014/02/28/9/1393598295_1283013917.gif"
         caption = "Сегодня отдыхаем 😎"
@@ -157,13 +169,13 @@ async def auto(callback: CallbackQuery):
             text = ("1.\n"
                     "2. (Пр) Huawei: Корсаков 201\n"
                     "3. <tg-spoiler>Физра</tg-spoiler>\n"
-                    "4. (Л) Нейронки: Сажин 224")
+                    "4. (Л) ФАП: Сажин 224")
             await handle_message(callback, 'auto_num_thu', text)
         elif define_numerator(day, month) == "Знаменатель":
             text = ("1. (Л) БЖД: Зеркалина 410-411\n"
                     "2. (Пр) БЖД: Зеркалина 410-411\n"
                     "3. <tg-spoiler>Физра</tg-spoiler>\n"
-                    "4. (Л) Нейронки: Сажин 224")
+                    "4. (Л) ФАП: Сажин 224")
             await handle_message(callback, 'auto_denum_thu', text)
     elif today_weekday == "Пятница":
         if define_numerator(day, month) == "Числитель":
@@ -179,8 +191,7 @@ async def auto(callback: CallbackQuery):
                     "4. Физра")
             await handle_message(callback, 'auto_denum_fri', text)
     elif today_weekday == "Суббота":
-        text = ("1. (Л) БД: Горбунов 216\n"
-                "2. (Л) БД: Горбунов 216")
+        text = ("1. (Л) БД: Горбунов 216")
         await handle_message(callback, 'auto_sat', text)
 
 
@@ -223,7 +234,7 @@ async def thursday(callback: CallbackQuery):
             + format_header("к/в 1") +
             "\n4. (Л) ASP\u200B.NET: Васильчиков 210\n"
             + format_header("к/в 2") +
-            "\n    (Л) Нейронки: Сажин 224")
+            "\n    (Л) ФАП: Сажин 224")
     await handle_message(callback, 'thursday', text)
 
 
@@ -241,8 +252,7 @@ async def friday(callback: CallbackQuery):
 @router.callback_query(F.data == 'sat')
 async def saturday(callback: CallbackQuery):
     text = ("<u><b>Суббота</b></u>\n"
-            "1. (Л) БД: Горбунов 216\n"
-            "2. (Л) БД: Горбунов 216")
+            "1. (Л) БД: Горбунов 216")
     await handle_message(callback, 'saturday', text)
 
 
