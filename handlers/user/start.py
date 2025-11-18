@@ -53,6 +53,7 @@ async def handle_command(message: Message, text: str, type: str, parse_mode: str
 
     new_message = await message.answer(text, parse_mode=parse_mode, reply_markup=reply_markup)
     # , show_alert=True
+
     if state:
         # Сохраняем в состоянии (обновляем словарь)
         command_messages[type] = new_message.message_id
@@ -141,8 +142,9 @@ async def auto(callback: CallbackQuery):
         await handle_message(callback, 'new_year', caption, url)
     elif define_numerator(day, month) == "Сессия":
         url = ("https://s7.ezgif.com/tmp/ezgif-7097d064d7d7107c.gif")
-        caption = "Удачи нам... 💀 🌑"
+        caption = "Удачи нам... 💀 🌑" # "сгущается тьма" - отправить сообщение в чате в определенное время
         await handle_message(callback, 'session', caption, url)
+
     elif weekday in [0, 6]:
         url = "https://cs4.pikabu.ru/post_img/2014/02/28/9/1393598295_1283013917.gif"
         caption = "Сегодня отдыхаем 😎"
@@ -278,7 +280,7 @@ async def left_time(callback: CallbackQuery):
     current_date = datetime.now(tz)  # Дата
     day = current_date.day
     month = current_date.month
-    total_days = 118
+    total_days = 116
 
     start = 2  # 02.09
     if month == 9:
