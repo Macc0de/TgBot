@@ -30,6 +30,14 @@ def define_numerator(day, month):
         return None
 
 
+def get_numerator(day, month):
+    numerator = define_numerator(day, month)
+    if numerator == "Числитель":
+        return "🔺"
+    elif numerator == "Знаменатель":
+        return "🔹"
+
+
 router = Router()  # Вместо диспетчера
 last_messages = {}
 
@@ -213,7 +221,11 @@ def format_header(text):
 
 @router.callback_query(F.data == 'wed')
 async def wednesay(callback: CallbackQuery):
-    text = ("<u><b>Среда</b></u>\n"
+    current_date = datetime.now(tz)  # Дата
+    day = current_date.day
+    month = current_date.month
+
+    text = ("<u><b>Среда</b></u> " + get_numerator(day, month) + "\n"
             "1.\n"
             "2. (Л) Теория автоматов: Кузьмин 220\n"
             "3. (Л) Рекурсивно-логическое пр-е: Башкин 204\n"
@@ -226,7 +238,11 @@ async def wednesay(callback: CallbackQuery):
 
 @router.callback_query(F.data == 'thu')
 async def thursday(callback: CallbackQuery):
-    text = ("<u><b>Четверг</b></u>\n"
+    current_date = datetime.now(tz)  # Дата
+    day = current_date.day
+    month = current_date.month
+
+    text = ("<u><b>Четверг</b></u> " + get_numerator(day, month) + "\n"
             "1. 🔺\n"
             "    🔹(Л) БЖД: Зеркалина 410-411\n"
             "2. 🔺(Пр) Huawei: Корсаков 201\n"
@@ -241,7 +257,11 @@ async def thursday(callback: CallbackQuery):
 
 @router.callback_query(F.data == 'fri')
 async def friday(callback: CallbackQuery):
-    text = ("<u><b>Пятница</b></u>\n"
+    current_date = datetime.now(tz)  # Дата
+    day = current_date.day
+    month = current_date.month
+
+    text = ("<u><b>Пятница</b></u> " + get_numerator(day, month) + "\n"
             "1. (Пр) Теория автоматов: Гладков 304\n"
             "2. 🔺<s>(Л) Веб-приложения: Васильев 221</s>\n"
             "    🔹(Л) Huawei: Корсаков 201(312)\n"
