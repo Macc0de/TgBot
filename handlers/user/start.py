@@ -306,7 +306,6 @@ async def left_time(callback: CallbackQuery):
     await handle_message(callback, 'left_time', text)
 
 
-
 # @dp.message_handler(commands="start")
 # async def handler(message: Message):
 #     msg = await message.answer("👋👋", reply_markup=main_keyboard.get_buttons(), parse_mode="Markdown")
