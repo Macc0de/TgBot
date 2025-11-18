@@ -53,7 +53,6 @@ async def handle_command(message: Message, text: str, type: str, parse_mode: str
 
     new_message = await message.answer(text, parse_mode=parse_mode, reply_markup=reply_markup)
     # , show_alert=True
-
     if state:
         # Сохраняем в состоянии (обновляем словарь)
         command_messages[type] = new_message.message_id
@@ -144,7 +143,6 @@ async def auto(callback: CallbackQuery):
         url = ("https://s7.ezgif.com/tmp/ezgif-7097d064d7d7107c.gif")
         caption = "Удачи нам... 💀 🌑"
         await handle_message(callback, 'session', caption, url)
-
     elif weekday in [0, 6]:
         url = "https://cs4.pikabu.ru/post_img/2014/02/28/9/1393598295_1283013917.gif"
         caption = "Сегодня отдыхаем 😎"
